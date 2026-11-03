@@ -1,0 +1,27 @@
+{
+  "lat": 9.509448999999998,
+  "lon": 76.3721704,
+  "radius_m": 500,
+  "elevation_m": 2.0,
+  "distance_to_nearest_waterway_m": 70.5,
+  "years_with_nearby_inundation": 2,
+  "years_checked": 3,
+  "by_year": {
+    "2018": {
+      "inundation_within_radius": true,
+      "distance_to_inundation_m": 7.0,
+      "flooded_road_m_in_radius": 728.2
+    },
+    "2019": {
+      "inundation_within_radius": true,
+      "distance_to_inundation_m": 380.5,
+      "flooded_road_m_in_radius": 0.0
+    },
+    "2021": {
+      "inundation_within_radius": false,
+      "distance_to_inundation_m": 564.1,
+      "flooded_road_m_in_radius": 0.0
+    }
+  },
+  "note": "Historical satellite-observed inundation near this location. Not proof that a specific building flooded."
+}
