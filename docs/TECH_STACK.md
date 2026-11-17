@@ -19,12 +19,12 @@ and reports.
 | Satellite processing | Google Earth Engine (JavaScript) | Extract yearly flood extent from radar | Niya |
 | Satellite data | Sentinel-1 radar (VV) | Detect surface water through cloud | Niya |
 | Supporting datasets | JRC Global Surface Water, SRTM | Remove permanent water and steep terrain; elevation | Niya |
-| Roads and waterways | OpenStreetMap via `osmnx` | Roads and waterways near each location | Diya |
-| GIS analysis | Python, GeoPandas | Roads intersecting flood areas, per-location stats | Diya |
+| Roads and waterways: OpenStreetMap (.pbf extract) via pyogrio; osmnx as fallback
+GIS analysis: Python, GeoPandas, Shapely, Rasterio | Diya |
 | Elevation | SRTM DEM (`dem.tif`) | Elevation at a location | Diya |
 | Frontend | [TODO: React or HTML/CSS/JS] | Search, timeline, layers, summary panel | Devika |
 | Interactive map | [TODO: Leaflet or Mapbox] | Show flood layers on a map | Devika |
-| Backend / API | Python, [TODO: Flask or FastAPI] | Serve data, handle community reports | Anupa |
+| Backend / API | Python, [TODO: Flask] | Serve data, handle community reports | Anupa |
 | Database | PostgreSQL + PostGIS | Store flood polygons and community reports | Anupa |
 | Dev tools | VS Code, Git, GitHub | Coding, version control, pull requests | All |
 | Optional AI/ML | Not implemented | Flood classification, clustering, photo analysis | Future work |
@@ -60,7 +60,7 @@ with GIS layers and community reports, and shown to users on the map.
 | Sentinel-1 GRD (`COPERNICUS/S1_GRD`) | Flood and water detection | Used |
 | JRC Global Surface Water (`JRC/GSW1_4`) | Removing permanent water (rivers, sea) | Used |
 | SRTM elevation (`USGS/SRTMGL1_003`) | Slope masking and `dem.tif` | Used |
-| OpenStreetMap | Roads and waterways | [TODO: Diya to confirm] |
+| OpenStreetMap (© OpenStreetMap contributors, ODbL) | Roads and waterways | Used |
 | NASA OPERA surface water products | Validation of our flood extents | Planned |
 | Community reports (photo, date, water level) | Ground-level evidence | [TODO: Anupa to confirm] |
 
@@ -101,9 +101,81 @@ Outputs:
 
 ### 5.2 GIS analysis (Diya)
 
-[TODO: Diya to confirm.] Planned: download OSM roads and waterways with `osmnx`, read elevation
-from `dem.tif`, and use GeoPandas to find roads intersecting flood areas and to produce summary
-statistics per location (for example flooded years, nearby roads affected, elevation).
+**Technologies**
+
+| Technology | Version | Role | Why chosen |
+|---|---|---|---|
+| Python | 3.14 | Language for the analysis pipeline | Standard for GIS work; same language as the Flask backend |
+| osmnx | 2.1.1 | Downloads OSM roads/waterways via the Overpass API (fallback when no `.pbf` file is present) | Clean road networks in one function call |
+| pyogrio | 0.13.0 | Reads the OSM `.pbf` file; fast GeoJSON read/write | Works offline, so no dependence on busy public servers |
+| GeoPandas | 1.2.0 | Overlay of roads with flood polygons, per-year statistics | Spatial operations on tables of geometries |
+| Shapely | 2.2.0 | Geometry operations: intersects, buffer, distance | Core geometry engine under GeoPandas |
+| Rasterio | 1.5.2 | Reads elevation values from `dem.tif` | Reads GeoTIFF rasters |
+| pandas / numpy | 3.1.0 / 2.5.4 | Data handling and statistics | Required by GeoPandas |
+
+**Inputs**
+
+- Flood polygons: `flood_2018/2019/2021.geojson`, EPSG:4326 (from `data/flood_geojson/`)
+- Elevation: `data/dem.tif`, SRTM 30 m GeoTIFF, EPSG:4326
+- Roads and waterways: `data/gis/osm.pbf`, a BBBike extract of OpenStreetMap data
+
+**What it does**
+
+1. Extracts drivable roads and waterways (rivers, canals, streams, drains) from the OSM file.
+2. Finds roads intersecting flood areas for each year. Each road gets `flooded_<year>`
+   (true/false), `near_<year>` (within 100 m) and `flooded_m_<year>` (metres flooded).
+3. `location_summary(lat, lon)` returns elevation, distance to the nearest waterway, and for
+   each year whether inundation was seen within 500 m, how far away, and metres of flooded road.
+
+**Coordinate systems and formats**
+
+- Exchange format: GeoJSON in EPSG:4326, directly loadable in Leaflet.
+- Calculations are reprojected to EPSG:32643 (UTM zone 43N) so distances are in metres.
+- Summary output: JSON for the Flask API and database.
+
+**Outputs** (the script writes to `out/`; results are stored in `data/gis/`)
+
+- `roads.geojson` (3,419 road segments)
+- `waterways.geojson` (298 waterway segments)
+- `roads_flood_by_year.geojson` (roads with flood attributes per year)
+- `location_summary_example.json` (format reference for the API)
+
+**Interfaces with the team**
+
+- Niya to Diya: flood GeoJSON and `dem.tif`
+- Diya to Devika: `roads_flood_by_year.geojson` and `waterways.geojson` (map layers)
+- Diya to Anupa: `location_summary_example.json` and `location_summary()` (API/database)
+
+**Area covered**
+
+8 km radius around 9.4981, 76.3388, limited to the downloaded OSM extract (about lat 9.447 to
+9.539, lon 76.258 to 76.386). The flood extraction area is larger (W 76.25, S 9.25, E 76.60,
+N 9.70).
+
+**How to run**
+
+1. `pip install -r requirements.txt` (includes osmnx, geopandas, rasterio, shapely, pyogrio)
+2. In `gis/diya_gis_analysis.py`, check the path settings at the top match the repo:
+   `FLOOD_DIR = "data/flood_geojson"`, `DEM_PATH = "data/dem.tif"`, `OSM_FILE = "data/gis/osm.pbf"`
+3. From the repo root run: `python gis/diya_gis_analysis.py`
+4. Results are written to `out/`.
+
+**Design decisions**
+
+- Public Overpass servers were often overloaded, so the script reads a downloaded `.pbf` file
+  when one exists and falls back to Overpass (with automatic retries) when it does not.
+- The demo point is chosen automatically as the middle of the most-flooded road, so the
+  example output shows flooding.
+
+**Limitations**
+
+- OSM road data may be incomplete.
+- Only 3 years (2018, 2019, 2021) and one area (Alappuzha / Kuttanad).
+- Results depend on the satellite extraction and are not formally validated.
+- Elevation is sampled at a single point, not an area summary.
+- No buildings layer yet.
+- The data shows satellite-observed inundation near a location, not proof that a specific road
+  or building flooded.
 
 ### 5.3 Frontend and map (Devika)
 
