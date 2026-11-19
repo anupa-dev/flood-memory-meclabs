@@ -8,7 +8,7 @@
 // Area of interest: [west, south, east, north]. Start small (Kuttanad / Alappuzha).
 // Once it works, enlarge it or run it for other districts.
 var aoi = ee.Geometry.Rectangle([76.25, 9.25, 76.60, 9.70]);
-
+var YEARS = [2018, 2019, 2021, 2022, 2023, 2025];
 // Flood event windows per year. VERIFY dates against news / KSDMA reports.
 // Keep each window at least ~12 days so Sentinel-1 gets at least one pass.
 var EVENTS = {

@@ -56,7 +56,13 @@ def api_floods():
         return jsonify({"error": f"year must be one of {YEARS}"}), 400
     return send_from_directory(FLOOD_DIR, f"flood_{year}.geojson", mimetype="application/json")
 
+OVERLAY_DIR = BASE_DIR / "data" / "overlays"
 
+@app.route("/api/overlays/<int:year>.png")
+def api_overlay(year):
+    if year not in YEARS:
+        return jsonify({"error": f"year must be one of {YEARS}"}), 400
+    return send_from_directory(OVERLAY_DIR, f"flood_{year}.png", mimetype="image/png")
 @app.route("/api/roads")
 def api_roads():
     return serve_geojson("roads_flood_by_year.geojson")
