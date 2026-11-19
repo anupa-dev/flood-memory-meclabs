@@ -4,8 +4,8 @@
   "radius_m": 500,
   "elevation_m": 2.0,
   "distance_to_nearest_waterway_m": 70.5,
-  "years_with_nearby_inundation": 2,
-  "years_checked": 3,
+  "years_with_nearby_inundation": 7,
+  "years_checked": 8,
   "by_year": {
     "2018": {
       "inundation_within_radius": true,
@@ -17,10 +17,35 @@
       "distance_to_inundation_m": 380.5,
       "flooded_road_m_in_radius": 0.0
     },
+    "2020": {
+      "inundation_within_radius": true,
+      "distance_to_inundation_m": 7.0,
+      "flooded_road_m_in_radius": 223.6
+    },
     "2021": {
       "inundation_within_radius": false,
       "distance_to_inundation_m": 564.1,
       "flooded_road_m_in_radius": 0.0
+    },
+    "2022": {
+      "inundation_within_radius": true,
+      "distance_to_inundation_m": 7.0,
+      "flooded_road_m_in_radius": 70.4
+    },
+    "2023": {
+      "inundation_within_radius": true,
+      "distance_to_inundation_m": 82.2,
+      "flooded_road_m_in_radius": 0.0
+    },
+    "2024": {
+      "inundation_within_radius": true,
+      "distance_to_inundation_m": 7.0,
+      "flooded_road_m_in_radius": 185.2
+    },
+    "2025": {
+      "inundation_within_radius": true,
+      "distance_to_inundation_m": 7.0,
+      "flooded_road_m_in_radius": 223.2
     }
   },
   "note": "Historical satellite-observed inundation near this location. Not proof that a specific building flooded."

@@ -14,10 +14,10 @@ CENTER = (9.4981, 76.3388)   # (lat, lon) of Alappuzha town
 DIST_M = 8000                # radius in metres around CENTER
 UTM = "EPSG:32643"           # metric CRS for Kerala
 NEAR_M = 100                 # "near flood" distance in metres
-FLOOD_DIR = "data/flood"
+FLOOD_DIR = "data/flood_geojson"
 DEM_PATH = "data/dem.tif"
-OSM_FILE = "data/osm.pbf"   # downloaded map file (used instead of the busy server)
-OUT = "out"
+OSM_FILE = "data/gis/osm.pbf"   # downloaded map file (used instead of the busy server)
+OUT = "data/gis"
 os.makedirs(OUT, exist_ok=True)
 
 # Backup Overpass server + longer timeout.

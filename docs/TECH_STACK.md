@@ -115,7 +115,7 @@ Outputs:
 
 **Inputs**
 
-- Flood polygons: `flood_2018/2019/2021.geojson`, EPSG:4326 (from `data/flood_geojson/`)
+- Flood polygons: `flood_2018.geojson` to `flood_2025.geojson` (8 years), EPSG:4326, in `data/flood_geojson/`
 - Elevation: `data/dem.tif`, SRTM 30 m GeoTIFF, EPSG:4326
 - Roads and waterways: `data/gis/osm.pbf`, a BBBike extract of OpenStreetMap data
 
@@ -126,6 +126,8 @@ Outputs:
    (true/false), `near_<year>` (within 100 m) and `flooded_m_<year>` (metres flooded).
 3. `location_summary(lat, lon)` returns elevation, distance to the nearest waterway, and for
    each year whether inundation was seen within 500 m, how far away, and metres of flooded road.
+4. The script reads every `flood_*.geojson` in the flood folder automatically, so adding a
+   year needs no code change.
 
 **Coordinate systems and formats**
 
@@ -133,12 +135,25 @@ Outputs:
 - Calculations are reprojected to EPSG:32643 (UTM zone 43N) so distances are in metres.
 - Summary output: JSON for the Flask API and database.
 
-**Outputs** (the script writes to `out/`; results are stored in `data/gis/`)
+**Outputs** (written to `data/gis/`)
 
 - `roads.geojson` (3,419 road segments)
 - `waterways.geojson` (298 waterway segments)
-- `roads_flood_by_year.geojson` (roads with flood attributes per year)
-- `location_summary_example.json` (format reference for the API)
+- `roads_flood_by_year.geojson` (roads with flood attributes for 2018 to 2025)
+- `location_summary_example.json` (format reference for the API; `years_checked: 8`)
+
+**Results (flooded roads per year)**
+
+| Year | Road segments | Flooded length (km) |
+|---|---|---|
+| 2018 | 66 | 10.9 |
+| 2019 | 4 | 0.1 |
+| 2020 (provisional) | 52 | 6.7 |
+| 2021 | 4  | 0.5 |
+| 2022 | 15 | 1.2 |
+| 2023 | 13 | 0.6 |
+| 2024 (provisional) | 49 | 5.5 |
+| 2025 | 40 | 3.6 |
 
 **Interfaces with the team**
 
@@ -154,11 +169,14 @@ N 9.70).
 
 **How to run**
 
-1. `pip install -r requirements.txt` (includes osmnx, geopandas, rasterio, shapely, pyogrio)
-2. In `gis/diya_gis_analysis.py`, check the path settings at the top match the repo:
-   `FLOOD_DIR = "data/flood_geojson"`, `DEM_PATH = "data/dem.tif"`, `OSM_FILE = "data/gis/osm.pbf"`
+1. `pip install osmnx geopandas rasterio shapely`
+2. Check the path settings at the top of `gis/diya_gis_analysis.py` match the repo:
+   `FLOOD_DIR = "data/flood_geojson"`, `DEM_PATH = "data/dem.tif"`,
+   `OSM_FILE = "data/gis/osm.pbf"`, `OUT = "data/gis"`
 3. From the repo root run: `python gis/diya_gis_analysis.py`
-4. Results are written to `out/`.
+4. Results are written to `data/gis/`.
+5. After any change to the flood files, run the script again and commit the regenerated
+   files in `data/gis/`.
 
 **Design decisions**
 
@@ -170,7 +188,9 @@ N 9.70).
 **Limitations**
 
 - OSM road data may be incomplete.
-- Only 3 years (2018, 2019, 2021) and one area (Alappuzha / Kuttanad).
+- One area (Alappuzha / Kuttanad); the road coverage is smaller than the flood extraction area.
+- Flood years 2020 and 2024 are provisional until the flood dates are confirmed; re-run the
+  script if they change.
 - Results depend on the satellite extraction and are not formally validated.
 - Elevation is sampled at a single point, not an area summary.
 - No buildings layer yet.
