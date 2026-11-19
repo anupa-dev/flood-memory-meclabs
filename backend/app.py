@@ -7,7 +7,11 @@ CORS(app)  # lets Devika's map talk to this server
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 FLOOD_DIR = BASE_DIR / "data" / "flood_geojson"
-YEARS = [2018, 2019, 2021]
+# Years are detected from the files in data/flood_geojson (flood_YEAR.geojson),
+# so adding a new year only needs the new file, no code change.
+YEARS = sorted(
+    int(p.stem.split("_")[1]) for p in FLOOD_DIR.glob("flood_*.geojson")
+)
 
 
 @app.route("/")
