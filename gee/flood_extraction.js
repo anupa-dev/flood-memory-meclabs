@@ -11,11 +11,22 @@ var aoi = ee.Geometry.Rectangle([76.25, 9.25, 76.60, 9.70]);
 
 // Flood event windows per year. VERIFY dates against news / KSDMA reports.
 // Keep each window at least ~12 days so Sentinel-1 gets at least one pass.
+// Years to process (one flood layer per year, 2018 to 2025)
+var YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
+
+// Fixed event windows. Years NOT listed here (2020, 2024) fall back to SEASON MODE:
+// the wettest conditions (10th percentile of VV) between 1 Jun and 31 Oct.
+// To use a fixed window for 2020 or 2024, add a line here once you have verified dates.
 var EVENTS = {
-  2018: {start: '2018-08-10', end: '2018-08-25'},
-  2019: {start: '2019-08-08', end: '2019-08-22'},
-  2021: {start: '2021-10-15', end: '2021-10-30'}
+  2018: {start: '2018-08-10', end: '2018-08-25'},  // original (Niya)
+  2019: {start: '2019-08-08', end: '2019-08-22'},  // original (Niya)
+  2021: {start: '2021-10-15', end: '2021-10-30'},  // original (Niya)
+  2022: {start: '2022-08-25', end: '2022-09-08'},  // news: Kuttanad waterlogging ~30 Aug 2022
+  2023: {start: '2023-07-03', end: '2023-07-17'},  // news: Kuttanad above danger level ~5-8 Jul 2023
+  2025: {start: '2025-05-24', end: '2025-06-07'}   // news: Kuttanad inundation late May 2025
 };
+var SEASON_START_MD = '-06-01';
+var SEASON_END_MD   = '-10-31';
 
 // Baseline (dry season) months used for "normal" water, same year as the event
 var BASE_START_MD = '-01-01';
@@ -58,17 +69,20 @@ function toWater(img) {
 
 // ---------- 3. MAIN LOOP: one flood layer per year ----------
 
-Object.keys(EVENTS).forEach(function (year) {
+YEARS.forEach(function (year) {
   var ev = EVENTS[year];
 
-  var eventCol = getS1(ev.start, ev.end);
+  var eventCol = ev ? getS1(ev.start, ev.end)
+                    : getS1(year + SEASON_START_MD, year + SEASON_END_MD);
   var baseCol  = getS1(year + BASE_START_MD, year + BASE_END_MD);
 
   // CHECK: if either prints 0, widen the dates
   print('Year ' + year + ' - event scenes:', eventCol.size(),
         ' baseline scenes:', baseCol.size());
 
-  var eventWater = toWater(eventCol.median());
+  var eventComp = ev ? eventCol.median()
+                     : eventCol.reduce(ee.Reducer.percentile([10])).rename('VV');
+  var eventWater = toWater(eventComp);
   var baseWater  = toWater(baseCol.median());
 
   // Baseline subtraction: wet now AND not wet normally AND not permanent water
@@ -111,7 +125,7 @@ Object.keys(EVENTS).forEach(function (year) {
     tileScale: 4
   }).map(function (f) {
     return f.set({year: Number(year), source: 'Sentinel-1 VV',
-                  method: 'median composite, baseline subtraction'});
+                  method: ev ? 'median composite, baseline subtraction' : 'season p10 composite, baseline subtraction'});
   });
 
   Export.table.toDrive({

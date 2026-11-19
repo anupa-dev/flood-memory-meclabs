@@ -24,11 +24,24 @@ For each flood year, the script:
 |---|---|
 | Area of interest | Alappuzha / Kuttanad |
 | Bounds [W, S, E, N] | `76.25, 9.25, 76.60, 9.70` |
-| Years | 2018, 2019, 2021 |
-| Event windows | 2018: 10-25 Aug; 2019: 8-22 Aug; 2021: 15-30 Oct |
+| Years with a flood layer | 2018, 2019, 2021, 2022, 2023, 2025 |
+| Years with no layer | 2020, 2024 (no major flood event identified) |
 | Resolution | 30 m |
 
-Event dates should be verified against news or official (e.g. KSDMA) reports.
+## Year status and event windows
+
+| Year | Status | Event window | Source |
+|---|---|---|---|
+| 2018 | Flood layer | 10 to 25 Aug 2018 | [https://www.manoramaonline.com/news/latest-news/2018/08/20/kottayam-rain-havoc-kerala-flood-live-updates.html#] |
+| 2019 | Flood layer | 8 to 22 Aug 2019 | [https://ml.wikipedia.org/wiki/%E0%B4%95%E0%B5%87%E0%B4%B0%E0%B4%B3%E0%B4%A4%E0%B5%8D%E0%B4%A4%E0%B4%BF%E0%B4%B2%E0%B5%86_%E0%B4%B5%E0%B5%86%E0%B4%B3%E0%B5%8D%E0%B4%B3%E0%B4%AA%E0%B5%8D%E0%B4%AA%E0%B5%8A%E0%B4%95%E0%B5%8D%E0%B4%95%E0%B4%82_(2019)] |
+| 2020 | No layer: no major flood event identified | n/a | Checked news and KSDMA reports on [1 June to 18 August 2020] |
+| 2021 | Flood layer | 15 to 30 Oct 2021 | [https://www.thenewsminute.com/kerala/consistent-floods-damaged-homes-force-people-leave-kerala-s-kuttanad-152898] |
+| 2022 | Flood layer| 25 Aug to 8 Sep 2022 | News: Kuttanad waterlogging around 30 Aug 2022 |
+| 2023 | Flood layer| 3 to 17 Jul 2023 | News: Kuttanad above danger level around 5 to 8 Jul 2023|
+| 2024 | No layer: no major flood event identified | n/a | Checked news and KSDMA reports|
+| 2025 | Flood layer (to verify) | 24 May to 7 Jun 2025 | News: Kuttanad inundation in late May 2025|
+
+"No layer" reflects what we found in public reports. It does not prove that no flooding occurred.
 
 ## Files
 
@@ -41,10 +54,17 @@ data/
     flood_2018.geojson
     flood_2019.geojson
     flood_2021.geojson
+    flood_2022.geojson
+    flood_2023.geojson
+    flood_2025.geojson
   overlays/
     flood_2018.png
     flood_2019.png
     flood_2021.png
+    flood_2022.png
+    flood_2023.png
+    flood_2025.png
+  dem.tif                    # SRTM elevation, 30 m
 ```
 
 GeoJSON details:
@@ -56,9 +76,9 @@ GeoJSON details:
 
 1. Sign in at https://code.earthengine.google.com/ (registered non-commercial project).
 2. Create a new script and paste the contents of `flood_extraction.js`.
-3. Edit the **SETTINGS** section if needed (area, years, threshold).
+3. Edit the **SETTINGS** section if needed (area, years, event windows, threshold).
 4. Click **Run**. Check the Console for scene counts and flooded area.
-5. Open the **Tasks** tab and click **Run** on each export. Files go to the Drive folder `FloodMemory`.
+5. Open the **Tasks** tab and click **Run** only on the exports you need. Files go to the Drive folder `FloodMemory`.
 6. PNG download links are printed in the Console.
 
 ### Settings you can tune
@@ -66,7 +86,8 @@ GeoJSON details:
 | Setting | Default | Effect |
 |---|---|---|
 | `aoi` | Alappuzha box | Area processed |
-| `EVENTS` | 2018, 2019, 2021 | Flood windows per year |
+| `YEARS` | 2018, 2019, 2021, 2022, 2023, 2025 | Which years are processed |
+| `EVENTS` | one window per year | Flood window used for each year |
 | `WATER_THRESHOLD_DB` | -16 | Lower = stricter water detection |
 | `MAX_SLOPE_DEG` | 5 | Ignore steeper terrain |
 | `MIN_BLOB_PIXELS` | 8 | Remove small patches |
@@ -81,17 +102,23 @@ const bounds = [[9.25, 76.25], [9.70, 76.60]];
 L.imageOverlay('data/overlays/flood_2018.png', bounds).addTo(map);
 ```
 
+For 2020 and 2024 there is no overlay. The app should show "No major flood event identified"
+for those years instead of an empty map.
+
 ## Known limitations
 
 - Radar can confuse smooth surfaces, shadow and wet paddy fields with floodwater.
 - Dense buildings and vegetation can hide floodwater from radar.
-- Sentinel-1 revisits every 6 to 12 days, so the image may not show the exact flood peak.
+- Sentinel-1 revisits every 6 to 12 days (about 12 days after 2021), so the image may not show the exact flood peak.
 - The result is a pixel-level estimate and has not been formally validated yet.
-- Coverage is currently limited to one area and three years.
+- Coverage is limited to one area (Alappuzha / Kuttanad) and six flood years.
+- Some event windows (2022, 2023, 2025) come from news reports and still need checking against official sources.
+- The script has a "season composite" fallback for years without a fixed window. It overestimates
+  flooding in Kuttanad, so it is not used for any published layer.
 
 ## Next steps
 
-- Add more years (e.g. 2020, 2022, 2023).
+- Verify the 2022, 2023 and 2025 windows against KSDMA or other official reports.
 - Extend coverage to other Kerala districts.
 - Validate against news reports, official maps or NASA OPERA data.
 
@@ -100,3 +127,5 @@ L.imageOverlay('data/overlays/flood_2018.png', bounds).addTo(map);
 - Sentinel-1 GRD (`COPERNICUS/S1_GRD`)
 - JRC Global Surface Water (`JRC/GSW1_4`)
 - SRTM elevation (`USGS/SRTMGL1_003`)
+- KSDMA modelled flood hazard maps for Alappuzha are a separate reference. They show modelled
+  return-period scenarios, not observed floods, and are not used to build these layers.
