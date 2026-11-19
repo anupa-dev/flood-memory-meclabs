@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#B8892B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <!-- Stack of map survey sheets / layers -->
+  <!-- Bottom layer -->
+  <path d="M 6 22 L 26 22" stroke-width="1.8" opacity="0.45" />
+  <!-- Middle layer -->
+  <path d="M 5 17 L 27 17" stroke-width="1.8" opacity="0.75" />
+  <!-- Topmost sheet with dog-eared fold -->
+  <path d="M 4 12 L 23 12 L 28 8 L 28 12" fill="rgba(20, 48, 46, 0.4)" stroke-width="1.6" />
+</svg>
+

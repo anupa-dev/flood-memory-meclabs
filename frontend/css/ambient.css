@@ -1,0 +1,215 @@
+/* =============================================================
+   FLOOD MAP — AMBIENT WORLD
+   Kettuvallam houseboat, swaying palm fronds, monsoon rain streaks.
+   All pointer-events: none; disabled under prefers-reduced-motion.
+   ============================================================= */
+
+/* ── 1. Rain canvas ─────────────────────────────────────────── */
+#rain-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 150; /* Above map and overlays, below floating UI */
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 1.2s var(--ease-out, ease-out);
+}
+
+/* ── 2. Coconut palm fronds (corners) ────────────────────────── */
+.palm-layer {
+  position: fixed;
+  pointer-events: none;
+  z-index: 160;
+  overflow: visible;
+  filter: drop-shadow(0 4px 12px rgba(10, 26, 24, 0.45));
+}
+
+.palm-layer--top-left {
+  top: -20px;
+  left: -20px;
+  width: 240px;
+  height: 220px;
+  transform-origin: 0% 0%;
+}
+
+.palm-layer--top-right {
+  top: -20px;
+  right: -20px;
+  width: 220px;
+  height: 200px;
+  transform-origin: 100% 0%;
+}
+
+/* Swaying animations with differing phase & duration */
+.palm-sway-1 {
+  animation: palm-sway-anim-1 7s ease-in-out infinite alternate;
+  transform-origin: 10px 10px;
+}
+
+.palm-sway-2 {
+  animation: palm-sway-anim-2 9.5s ease-in-out infinite alternate;
+  transform-origin: 15px 15px;
+}
+
+.palm-sway-3 {
+  animation: palm-sway-anim-3 6.2s ease-in-out infinite alternate;
+  transform-origin: 200px 10px;
+}
+
+@keyframes palm-sway-anim-1 {
+  0%   { transform: rotate(-3deg); }
+  100% { transform: rotate(3.5deg); }
+}
+
+@keyframes palm-sway-anim-2 {
+  0%   { transform: rotate(2deg) scale(0.98); }
+  100% { transform: rotate(-3deg) scale(1.02); }
+}
+
+@keyframes palm-sway-anim-3 {
+  0%   { transform: rotate(-2.5deg); }
+  100% { transform: rotate(3deg); }
+}
+
+/* ── 3. Kettuvallam (Kerala Houseboat) ───────────────────────── */
+#kettuvallam-wrap {
+  position: fixed;
+  bottom: 12px;
+  left: -220px;
+  z-index: 170;
+  pointer-events: none;
+  width: 180px;
+  height: 60px;
+  filter: drop-shadow(0 6px 16px rgba(10, 26, 24, 0.5));
+  will-change: transform;
+}
+
+/* Drifting animation across the screen */
+@keyframes kettuvallam-drift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(100vw + 340px));
+  }
+}
+
+.kettuvallam-active {
+  animation: kettuvallam-drift 110s linear infinite;
+}
+
+/* Bobbing motion of the hull on gentle water */
+.kettuvallam-bob {
+  animation: kettuvallam-bob-anim 4.5s ease-in-out infinite alternate;
+  transform-origin: center bottom;
+}
+
+@keyframes kettuvallam-bob-anim {
+  0%   { transform: translateY(0px) rotate(-0.5deg); }
+  50%  { transform: translateY(-2px) rotate(0.4deg); }
+  100% { transform: translateY(1px) rotate(-0.2deg); }
+}
+
+/* Soft reflection below hull */
+.kettuvallam-reflection {
+  opacity: 0.32;
+  filter: blur(1.5px);
+  transform: scaleY(-0.6) translateY(-14px);
+  transform-origin: center top;
+}
+
+/* ── 4. Arrival overlay ──────────────────────────────────────── */
+#arrival-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-night, #14302E);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-mist, #E4EBE5);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: all;
+}
+
+#arrival-overlay.arrival-fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.arrival-title {
+  font-family: var(--font-serif, "Noto Serif", Georgia, serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-mist, #E4EBE5);
+  margin-bottom: 8px;
+}
+
+.arrival-subtitle {
+  font-family: var(--font-sans, "Anek Latin", sans-serif);
+  font-size: 0.95rem;
+  color: var(--color-gold, #B8892B);
+  letter-spacing: 0.04em;
+  margin-bottom: 24px;
+}
+
+.arrival-loader-bar {
+  width: 140px;
+  height: 2px;
+  background: rgba(184, 137, 43, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.arrival-loader-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: var(--color-gold, #B8892B);
+  animation: arrival-progress-anim 2.4s ease-in-out forwards;
+}
+
+@keyframes arrival-progress-anim {
+  0%   { width: 0%; }
+  40%  { width: 55%; }
+  80%  { width: 85%; }
+  100% { width: 100%; }
+}
+
+/* ── 5. Responsive adaptations ───────────────────────────────── */
+@media (max-width: 768px) {
+  #kettuvallam-wrap {
+    transform: scale(0.65);
+    bottom: 50px;
+  }
+  .palm-layer--top-left {
+    width: 140px;
+    height: 130px;
+  }
+  .palm-layer--top-right {
+    width: 130px;
+    height: 120px;
+  }
+}
+
+/* ── 6. Accessibility: Reduced Motion ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  #rain-canvas,
+  .palm-layer,
+  #kettuvallam-wrap {
+    display: none !important;
+  }
+  #arrival-overlay {
+    transition: none !important;
+  }
+  .arrival-loader-progress {
+    animation: none !important;
+    width: 100% !important;
+  }
+}
+

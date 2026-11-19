@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#14302E" />
+  <title>Flood Map</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+  <!-- Google Fonts: Noto Serif + Anek Latin -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;1,700&family=Anek+Latin:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Leaflet 1.9.4 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Application CSS (order matters) -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/map.css" />
+  <link rel="stylesheet" href="css/gauge.css" />
+  <link rel="stylesheet" href="css/panels.css" />
+  <link rel="stylesheet" href="css/ambient.css" />
+</head>
+
+<body>
+
+  <div id="app-shell" aria-label="Application shell">
+
+    <!-- Full-bleed map canvas -->
+    <div id="map-container" aria-label="Interactive flood map"></div>
+
+    <!-- River gauge timeline, docked left on desktop -->
+    <aside id="gauge-rail" aria-label="River gauge timeline"></aside>
+
+    <!-- Floating search bar, top-centre -->
+    <div id="search-bar" role="search" aria-label="Location search"></div>
+
+    <!-- Summary panel: right on desktop, bottom-sheet on mobile -->
+    <section id="summary-panel" aria-label="Location flood summary" aria-hidden="true"></section>
+
+    <!-- Legend, always visible, bottom-left -->
+    <div id="legend-bar" role="complementary" aria-label="Map legend"></div>
+
+    <!-- Layer toggle controls, floating right -->
+    <div id="layer-controls" role="group" aria-label="Layer controls"></div>
+
+    <!-- Year comparison split-view (hidden initially) -->
+    <div id="compare-panel" aria-label="Year comparison view" aria-hidden="true" hidden></div>
+
+    <!-- Community reports panel (hidden initially) -->
+    <section id="report-panel" aria-label="Community reports" aria-hidden="true" hidden></section>
+
+    <!-- Full-screen arrival overlay, removed after animation completes -->
+    <div id="arrival-overlay" role="presentation" aria-hidden="true"></div>
+
+    <!-- Loading indicator -->
+    <div id="loading-indicator" role="status" aria-live="polite" aria-label="Loading" aria-hidden="true"></div>
+
+    <!-- Application-level error display -->
+    <div id="error-display" role="alert" aria-live="assertive" aria-label="Error message" aria-hidden="true"></div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" role="status" aria-live="polite" aria-label="Notifications" aria-atomic="false"></div>
+
+  </div>
+
+  <!-- Leaflet 1.9.4 JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Application scripts (load order is significant) -->
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/gauge.js"></script>
+  <script src="js/summary.js"></script>
+  <script src="js/layers.js"></script>
+  <script src="js/compare.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/ambient.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+
+</html>

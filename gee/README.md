@@ -24,8 +24,8 @@ For each flood year, the script:
 |---|---|
 | Area of interest | Alappuzha / Kuttanad |
 | Bounds [W, S, E, N] | `76.25, 9.25, 76.60, 9.70` |
-| Years | 2018, 2019, 2021 |
-| Event windows | 2018: 10-25 Aug; 2019: 8-22 Aug; 2021: 15-30 Oct |
+| Years | 2018, 2019, 2021, 2022, 2023, 2025 (no record for 2020 and 2024)|
+| Event windows | 2018: 10-25 Aug; 2019: 8-22 Aug; 2021: 15-30 Oct 2022: 25 Aug-8 Sep; 2023: 3-17 Jul; 2025: 24 May-7 Jun (from news reports, to be verified)|
 | Resolution | 30 m |
 
 Event dates should be verified against news or official (e.g. KSDMA) reports.

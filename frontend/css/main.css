@@ -1,0 +1,562 @@
+/* =============================================================
+   FLOOD MAP — MAIN DESIGN SYSTEM
+   Design tokens, reset, typography, utilities, breakpoints.
+   All palette / type / spacing / z-index / timing lives here.
+   ============================================================= */
+
+/* ─────────────────────────────────────────────────────────────
+   1. DESIGN TOKENS
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Core palette ── */
+  --color-night:        #14302E;   /* deep green-teal, main dark surface */
+  --color-mist:         #E4EBE5;   /* light surface / paper base */
+  --color-gold:         #B8892B;   /* single accent — thin lines, key states */
+  --color-paddy:        #5F7F4A;   /* secondary green */
+  --color-laterite:     #8E3B2A;   /* warnings / errors ONLY */
+  --color-waterway:     #7FA9A6;   /* map waterway strokes — no other use */
+  --color-inundation:   rgb(30, 94, 255); /* satellite data — never recolour */
+
+  /* ── Night surface at opacity steps (for layering panels) ── */
+  --night-85:  rgba(20, 48, 46, 0.85);
+  --night-70:  rgba(20, 48, 46, 0.70);
+  --night-50:  rgba(20, 48, 46, 0.50);
+
+  /* ── Night tints / shades ── */
+  --color-night-dark:   #0C1F1D;   /* 20% darker */
+  --color-night-mid:    #1E4541;   /* midpoint step */
+  --color-night-lift:   #2A5E59;   /* lighter surface step */
+
+  /* ── Gold tints / shades ── */
+  --color-gold-pale:    #DDB96A;   /* tinted: disabled / secondary accent */
+  --color-gold-deep:    #8C641A;   /* shade: active / pressed accent */
+
+  /* ── Mist tints ── */
+  --color-mist-warm:    #EDF0E6;   /* very slight warm paper cast */
+  --color-mist-mid:     #C8D4CB;   /* mid-step for borders */
+
+  /* ── Laterite tints ── */
+  --color-laterite-bg:  rgba(142, 59, 42, 0.12); /* error tint fill */
+
+  /* ── Typography ── */
+  --font-serif:  'Noto Serif', Georgia, serif;
+  --font-sans:   'Anek Latin', 'Helvetica Neue', Arial, sans-serif;
+
+  /* ── Type scale (px → rem at 16px root) ── */
+  --text-2xs:  0.6875rem;  /* 11px */
+  --text-xs:   0.8125rem;  /* 13px */
+  --text-sm:   0.9375rem;  /* 15px */
+  --text-base: 1.125rem;   /* 18px */
+  --text-lg:   1.5rem;     /* 24px */
+  --text-xl:   2rem;       /* 32px */
+  --text-2xl:  3rem;       /* 48px */
+
+  /* ── Line heights ── */
+  --leading-tight:  1.2;
+  --leading-snug:   1.4;
+  --leading-normal: 1.6;
+  --leading-loose:  1.8;
+
+  /* ── Letter spacing ── */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.04em;   /* used sparingly, never all-caps */
+
+  /* ── Spacing scale (4px base) ── */
+  --space-1:  0.25rem;   /*  4px */
+  --space-2:  0.5rem;    /*  8px */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+
+  /* ── Z-index layers ── */
+  --z-map:         0;
+  --z-overlay:    10;    /* flood overlay, rain canvas */
+  --z-ambient:    15;    /* kettuvallam, palms */
+  --z-gauge:      20;    /* gauge rail */
+  --z-panel:      30;    /* summary, legend, layer controls */
+  --z-search:     40;    /* search bar */
+  --z-compare:    50;    /* compare panel (full-screen) */
+  --z-toast:      60;    /* toasts */
+  --z-banner:     70;    /* backend-down banner */
+  --z-modal:      80;    /* future modals */
+
+  /* ── Transition / animation timing ── */
+  --ease-out:    cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in:     cubic-bezier(0.4, 0.0, 1.0, 1);
+  --ease-inout:  cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --duration-fast:   150ms;
+  --duration-normal: 300ms;
+  --duration-slow:   600ms;
+  --duration-panel:  400ms;
+
+  /* ── Borders ── */
+  --border-hair:  1px;
+  --border-thin:  1.5px;
+  --border-med:   2px;
+  --border-thick: 4px;
+
+  /* ── Focus ring ── */
+  --focus-ring-color: var(--color-gold);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 3px;
+
+  /* ── Misc ── */
+  --panel-max-width: 380px;
+  --gauge-rail-width: 176px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. CSS RESET & BOX-SIZING
+   ───────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+/* Remove list styling for semantic lists used as UI components */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+}
+
+/* Sensible table defaults */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Hidden but accessible */
+[hidden] {
+  display: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. BODY & APP SHELL
+   ───────────────────────────────────────────────────────────── */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--color-mist);
+  background-color: var(--color-night);
+  overflow: hidden; /* map occupies full viewport */
+}
+
+#app-shell {
+  position: relative;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. TYPOGRAPHY
+   ───────────────────────────────────────────────────────────── */
+
+/* Headings — serif, tight leading */
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--color-mist);
+}
+
+h1 {
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-tight);
+}
+
+h2 {
+  font-size: var(--text-xl);
+  letter-spacing: var(--tracking-tight);
+}
+
+h3 {
+  font-size: var(--text-lg);
+}
+
+h4 {
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+/* Interface text — sans */
+p, li, label, td, th, caption {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+small {
+  font-size: var(--text-xs);
+}
+
+/* Strong retains family */
+strong {
+  font-weight: 600;
+}
+
+em {
+  font-style: italic;
+}
+
+/* Links — gold, no underline by default, underline on hover */
+a {
+  color: var(--color-gold);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+  color: var(--color-gold-pale);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. FOCUS-VISIBLE RING (gold, accessible)
+   ───────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: 2px; /* minimal — only here, not global */
+}
+
+/* Suppress mouse-focus ring */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. PANEL TEXTURE — village record-book aesthetic
+   ───────────────────────────────────────────────────────────── */
+
+/* Subtle ruled-line pattern at very low opacity — like a village record book */
+.panel-texture {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 22px,
+      rgba(20, 48, 46, 0.055) 22px,
+      rgba(20, 48, 46, 0.055) 23px
+    );
+  background-size: 100% 23px;
+}
+
+/* On dark panels (night-bg), use lighter ruled lines */
+.panel-texture--dark {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 22px,
+      rgba(228, 235, 229, 0.045) 22px,
+      rgba(228, 235, 229, 0.045) 23px
+    );
+  background-size: 100% 23px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. BINDING EDGE — ledger / record-book left margin
+   ───────────────────────────────────────────────────────────── */
+
+/* 4px night-dark border with hairline gold inner stripe */
+.binding-edge {
+  border-left: var(--border-thick) solid var(--color-night-dark);
+  position: relative;
+}
+
+.binding-edge::before {
+  content: '';
+  position: absolute;
+  left: var(--border-thick);         /* sits just inside the dark border */
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--color-gold);
+  opacity: 0.55;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8. UTILITY CLASSES
+   ───────────────────────────────────────────────────────────── */
+
+/* Visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Text sizes */
+.text-2xs  { font-size: var(--text-2xs); }
+.text-xs   { font-size: var(--text-xs); }
+.text-sm   { font-size: var(--text-sm); }
+.text-base { font-size: var(--text-base); }
+.text-lg   { font-size: var(--text-lg); }
+.text-xl   { font-size: var(--text-xl); }
+.text-2xl  { font-size: var(--text-2xl); }
+
+/* Font family */
+.font-serif { font-family: var(--font-serif); }
+.font-sans  { font-family: var(--font-sans); }
+
+/* Weight */
+.font-light    { font-weight: 300; }
+.font-normal   { font-weight: 400; }
+.font-medium   { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold     { font-weight: 700; }
+
+/* Colour utilities */
+.text-gold     { color: var(--color-gold); }
+.text-mist     { color: var(--color-mist); }
+.text-paddy    { color: var(--color-paddy); }
+.text-laterite { color: var(--color-laterite); }
+.text-night    { color: var(--color-night); }
+
+/* Display */
+.block        { display: block; }
+.inline-block { display: inline-block; }
+.flex         { display: flex; }
+.inline-flex  { display: inline-flex; }
+.grid         { display: grid; }
+.hidden       { display: none; }
+
+/* Flex helpers */
+.flex-col      { flex-direction: column; }
+.items-center  { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-1  { gap: var(--space-1); }
+.gap-2  { gap: var(--space-2); }
+.gap-3  { gap: var(--space-3); }
+.gap-4  { gap: var(--space-4); }
+
+/* Spacing */
+.p-2  { padding: var(--space-2); }
+.p-3  { padding: var(--space-3); }
+.p-4  { padding: var(--space-4); }
+.p-6  { padding: var(--space-6); }
+.px-3 { padding-left: var(--space-3); padding-right: var(--space-3); }
+.px-4 { padding-left: var(--space-4); padding-right: var(--space-4); }
+.py-2 { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+.py-3 { padding-top: var(--space-3); padding-bottom: var(--space-3); }
+
+/* Truncate */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Opacity */
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+
+/* Gold hairline divider */
+.divider-gold {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-gold);
+  opacity: 0.3;
+  margin: var(--space-4) 0;
+}
+
+/* Thin gold ornament line (decorative top border) */
+.ornament-top {
+  border-top: var(--border-hair) solid var(--color-gold);
+  padding-top: var(--space-3);
+  opacity: 0.6;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   9. BUTTON BASE — shared line weight, gold accent, unique shapes
+      (actual clip-paths live in panels.css per button)
+   ───────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-mist);
+  background: transparent;
+  border: var(--border-thin) solid var(--color-gold);
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover {
+  background-color: rgba(184, 137, 43, 0.12);
+  color: var(--color-gold-pale);
+}
+
+.btn:active {
+  background-color: rgba(184, 137, 43, 0.22);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary variant — gold fill */
+.btn--primary {
+  background-color: var(--color-gold);
+  color: var(--color-night-dark);
+  border-color: var(--color-gold);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-gold-pale);
+  border-color: var(--color-gold-pale);
+  color: var(--color-night-dark);
+}
+
+/* Ghost variant */
+.btn--ghost {
+  border-color: rgba(184, 137, 43, 0.4);
+}
+
+/* Danger variant — laterite */
+.btn--danger {
+  border-color: var(--color-laterite);
+  color: var(--color-laterite);
+}
+
+.btn--danger:hover {
+  background-color: var(--color-laterite-bg);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   10. SCROLLBAR STYLING (Webkit)
+   ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-night-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-night-lift);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-deep);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   11. SELECTION
+   ───────────────────────────────────────────────────────────── */
+::selection {
+  background-color: rgba(184, 137, 43, 0.35);
+  color: var(--color-mist);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   12. MEDIA QUERY BREAKPOINTS
+   ───────────────────────────────────────────────────────────── */
+/*
+  Breakpoint reference:
+    Mobile:   < 640px
+    Tablet:   640px – 1023px
+    Desktop:  ≥ 1024px
+    Wide:     ≥ 1440px
+
+  Usage: @media (max-width: 639px) { ... }
+         @media (min-width: 640px) and (max-width: 1023px) { ... }
+         @media (min-width: 1024px) { ... }
+         @media (min-width: 1440px) { ... }
+*/
+
+/* Touch-safe tap targets */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   13. REDUCED MOTION
+   ───────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
