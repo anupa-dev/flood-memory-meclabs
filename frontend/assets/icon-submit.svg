@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#B8892B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <!-- Sealed ledger envelope envelope body -->
+  <rect x="5" y="8" width="22" height="16" rx="2" stroke="#B8892B" fill="rgba(20, 48, 46, 0.4)" />
+  <!-- Fold flap -->
+  <path d="M 5 8 L 16 17 L 27 8" stroke="#B8892B" stroke-width="1.5" />
+  <!-- Prominent validation checkmark inside seal -->
+  <circle cx="16" cy="18" r="5" fill="#14302E" stroke="#B8892B" stroke-width="1.3" />
+  <polyline points="13.5 18 15.2 20 18.5 16" stroke="#5F7F4A" stroke-width="1.8" />
+</svg>
+

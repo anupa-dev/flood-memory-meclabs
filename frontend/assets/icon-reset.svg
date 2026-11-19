@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#B8892B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <!-- Sweeping counter-clockwise resetting arc (~270 deg) -->
+  <path d="M 16 7 A 10 10 0 1 0 25.5 19.5" />
+  <!-- Custom hand-crafted arrowhead -->
+  <polyline points="12 4 16 7 12 11" stroke-width="1.8" />
+</svg>
+

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#B8892B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <!-- Supporting bamboo / wooden stake pole -->
+  <line x1="16" y1="4" x2="16" y2="28" stroke="#B8892B" stroke-width="1.8" />
+  <!-- Pinned paper slip with folded corner at top-right -->
+  <path d="M 9 9 L 20 9 L 23 12 L 23 23 L 9 23 Z" fill="#E4EBE5" stroke="#14302E" stroke-width="1.4" />
+  <path d="M 20 9 L 20 12 L 23 12 Z" fill="#C8CECC" stroke="#14302E" stroke-width="1" />
+  <!-- Faint horizontal report lines -->
+  <line x1="12" y1="13" x2="18" y2="13" stroke="#14302E" stroke-width="1" opacity="0.65" />
+  <line x1="12" y1="16" x2="20" y2="16" stroke="#14302E" stroke-width="1" opacity="0.65" />
+  <line x1="12" y1="19" x2="17" y2="19" stroke="#14302E" stroke-width="1" opacity="0.65" />
+  <!-- Brass pin head holding paper to post -->
+  <circle cx="16" cy="8" r="1.8" fill="#8E3B2A" stroke="#B8892B" stroke-width="1" />
+</svg>
+

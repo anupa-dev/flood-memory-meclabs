@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+  <!-- Backwater night background with gold rim -->
+  <rect x="1" y="1" width="30" height="30" rx="5" fill="#14302E" stroke="#B8892B" stroke-width="1.5" />
+  <!-- "FM" in serif monogram style -->
+  <text x="16" y="21.5" font-family="'Noto Serif', Georgia, serif" font-size="14.5" font-weight="700" fill="#B8892B" text-anchor="middle" letter-spacing="-0.5">FM</text>
+</svg>
+

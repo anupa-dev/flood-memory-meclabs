@@ -1,0 +1,534 @@
+/* =============================================================
+   FLOOD MAP — MAP STYLES
+   Map container, Leaflet overrides, attribution, overlays,
+   markers, coverage toast, backend-down banner.
+   ============================================================= */
+
+/* ─────────────────────────────────────────────────────────────
+   1. MAP CONTAINER — full bleed, fixed
+   ───────────────────────────────────────────────────────────── */
+#map-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: var(--z-map);
+  background-color: var(--color-night);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. LEAFLET OVERRIDES
+   ───────────────────────────────────────────────────────────── */
+
+/* Remove Leaflet's default font — we control typography */
+.leaflet-container {
+  font-family: var(--font-sans) !important;
+  font-size: var(--text-xs) !important;
+  background-color: var(--color-night);
+}
+
+/* Tint street tiles into rain-washed mist palette, quiet and clear */
+.leaflet-tile-pane {
+  filter: none; /* show the street map in its own true colours */
+}
+
+/* Leaflet controls: match night theme */
+.leaflet-control-zoom a {
+  background-color: var(--color-night-mid) !important;
+  color: var(--color-mist) !important;
+  border-color: var(--color-gold) !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--text-sm) !important;
+  line-height: 28px !important;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: rgba(184, 137, 43, 0.15) !important;
+  color: var(--color-gold-pale) !important;
+}
+
+.leaflet-control-zoom {
+  border: var(--border-thin) solid var(--color-gold) !important;
+  border-radius: 0 !important; /* no uniform rounding */
+  overflow: hidden;
+}
+
+/* Leaflet popup overrides */
+.leaflet-popup-content-wrapper {
+  background: var(--color-night-mid) !important;
+  color: var(--color-mist) !important;
+  border: 1px solid var(--color-gold) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+  font-family: var(--font-sans) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--color-night-mid) !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--color-gold) !important;
+  font-size: 18px !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. CUSTOM ATTRIBUTION BAR
+   Bottom-right: dark glass panel, small italic serif, gold links.
+   Replaces Leaflet's default attribution.
+   ───────────────────────────────────────────────────────────── */
+.leaflet-control-attribution {
+  background: var(--night-85) !important;
+  color: rgba(228, 235, 229, 0.65) !important;
+  font-family: var(--font-serif) !important;
+  font-style: italic !important;
+  font-size: var(--text-2xs) !important;
+  letter-spacing: 0.01em;
+  padding: var(--space-1) var(--space-3) !important;
+  border-top: 1px solid rgba(184, 137, 43, 0.2) !important;
+  border-left: 1px solid rgba(184, 137, 43, 0.2) !important;
+  border-radius: 0 !important;
+  max-width: 60vw;
+  backdrop-filter: none; /* no glassmorphism */
+}
+
+.leaflet-control-attribution a {
+  color: var(--color-gold) !important;
+  text-decoration: none;
+}
+
+.leaflet-control-attribution a:hover {
+  text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. FLOOD OVERLAY
+   ───────────────────────────────────────────────────────────── */
+.flood-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  /* Inundation colour is rgb(30,94,255) — applied by JS, never overridden */
+}
+
+/* PNG overlay loaded as Leaflet ImageOverlay */
+.leaflet-image-layer.flood-overlay {
+  mix-blend-mode: multiply;
+  opacity: 0.75;
+  transition: opacity var(--duration-slow) var(--ease-inout);
+}
+
+/* GeoJSON flood polygon fallback */
+.flood-polygon {
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. CUSTOM MAP MARKERS
+   ───────────────────────────────────────────────────────────── */
+.custom-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  position: relative;
+}
+
+/* Teardrop marker — point selected on map */
+.custom-marker__pin {
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-gold);
+  border: 2px solid var(--color-night-dark);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition:
+    transform var(--duration-normal) var(--ease-spring),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.custom-marker__pin:hover {
+  background-color: var(--color-gold-pale);
+}
+
+/* Pulsing ring on selected marker */
+.custom-marker__ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-gold);
+  opacity: 0;
+  animation: marker-pulse 2.4s var(--ease-out) infinite;
+}
+
+@keyframes marker-pulse {
+  0%   { opacity: 0.8; transform: scale(0.7); }
+  70%  { opacity: 0;   transform: scale(1.6); }
+  100% { opacity: 0;   transform: scale(1.6); }
+}
+
+/* Community report marker — different shape (diamond) */
+.report-marker {
+  width: 14px;
+  height: 14px;
+  background-color: var(--color-paddy);
+  border: 1.5px solid var(--color-gold);
+  transform: rotate(45deg);
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.report-marker:hover {
+  background-color: var(--color-gold);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. OUTSIDE-COVERAGE TOAST
+   Top-centre of the map (below search bar), slides down briefly.
+   ───────────────────────────────────────────────────────────── */
+#coverage-toast {
+  position: fixed;
+  top: 72px;    /* below search bar */
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  z-index: var(--z-toast);
+  background-color: var(--night-85);
+  color: var(--color-mist);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--color-gold);
+  border-top: 3px solid var(--color-gold);
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform var(--duration-normal) var(--ease-out),
+    opacity var(--duration-normal) var(--ease-out);
+  white-space: nowrap;
+}
+
+#coverage-toast.toast--visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. BACKEND-DOWN BANNER
+   Full width, top of map, laterite background, clear readable text.
+   ───────────────────────────────────────────────────────────── */
+#backend-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-banner);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-6);
+  background-color: var(--color-laterite);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: var(--leading-snug);
+  transform: translateY(-100%);
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+#backend-banner.banner--visible {
+  transform: translateY(0);
+}
+
+#backend-banner::before {
+  content: '⚠';
+  font-size: var(--text-base);
+  flex-shrink: 0;
+}
+
+#backend-banner strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Retry button inside banner */
+#backend-banner .btn--retry {
+  margin-left: auto;
+  flex-shrink: 0;
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #fff;
+  font-size: var(--text-2xs);
+  padding: var(--space-1) var(--space-3);
+}
+
+#backend-banner .btn--retry:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8. ARRIVAL OVERLAY — full-screen intro, removed after anim
+   ───────────────────────────────────────────────────────────── */
+#arrival-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background-color: var(--color-night);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  pointer-events: all;
+  transition: opacity var(--duration-slow) var(--ease-in);
+}
+
+#arrival-overlay.arrival--fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#arrival-overlay.arrival--gone {
+  display: none;
+}
+
+.arrival-wordmark {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-mist);
+  letter-spacing: var(--tracking-tight);
+}
+
+.arrival-wordmark-local {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-gold);
+  letter-spacing: 0.03em;
+  opacity: 0.85;
+}
+
+.arrival-ornament {
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  opacity: 0.7;
+}
+
+/* =============================================================
+   MAP.JS ADDITIONS — custom zoom, pin, disclaimer, toast,
+   search dropdown, coverage warning.
+   ============================================================= */
+
+/* ─────────────────────────────────────────────────────────────
+   CUSTOM ZOOM CONTROL  (#custom-zoom, bottom-right)
+   Gold +/− buttons, hand-crafted.
+   ───────────────────────────────────────────────────────────── */
+#custom-zoom {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.custom-zoom__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--color-night-mid, #1a2e2b);
+  color: var(--color-gold, #C9A84C);
+  border: 1px solid var(--color-gold, #C9A84C);
+  border-radius: 2px;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--duration-fast, 120ms) ease;
+  user-select: none;
+}
+
+.custom-zoom__btn:hover {
+  background: rgba(201, 168, 76, 0.18);
+  color: var(--color-gold-pale, #e4c97a);
+}
+
+.custom-zoom__btn:active {
+  background: rgba(201, 168, 76, 0.32);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CUSTOM SVG PIN MARKER  (.fm-pin-icon, .fm-pin--bounce)
+   ───────────────────────────────────────────────────────────── */
+.fm-pin-icon {
+  /* Leaflet DivIcon wrapper — no default border/bg */
+  background: none !important;
+  border:     none !important;
+}
+
+/* Brief bounce drop animation triggered in JS */
+@keyframes fm-pin-drop {
+  0%   { transform: translateY(-24px); animation-timing-function: ease-in; }
+  60%  { transform: translateY(4px);   animation-timing-function: ease-out; }
+  80%  { transform: translateY(-8px);  animation-timing-function: ease-in; }
+  100% { transform: translateY(0);     animation-timing-function: ease-out; }
+}
+
+.fm-pin--bounce {
+  animation: fm-pin-drop 0.55s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fm-pin--bounce { animation: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ALWAYS-VISIBLE DISCLAIMER  (.fm-disclaimer, bottom-left)
+   ───────────────────────────────────────────────────────────── */
+.fm-disclaimer {
+  max-width: 320px;
+  background: rgba(10, 20, 18, 0.80);
+  color: rgba(228, 235, 229, 0.70);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 10px;
+  font-style: italic;
+  line-height: 1.4;
+  padding: 4px 8px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TOAST  (#fm-toast)
+   General map error/info toast — top-centre, slides down.
+   ───────────────────────────────────────────────────────────── */
+#fm-toast {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-130%);
+  z-index: 10000;
+  background: var(--color-night-mid, #1a2e2b);
+  color: var(--color-mist, #e4ebe5);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 13px;
+  padding: 8px 20px;
+  border: 1px solid var(--color-gold, #C9A84C);
+  border-top: 3px solid var(--color-gold, #C9A84C);
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform 200ms ease,
+    opacity   200ms ease;
+  white-space: nowrap;
+  max-width: 90vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#fm-toast.fm-toast--visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SEARCH AUTOCOMPLETE DROPDOWN  (.fm-search-dropdown)
+   Appended inside #search-bar; absolute below input.
+   ───────────────────────────────────────────────────────────── */
+.fm-search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-night-mid, #1a2e2b);
+  border: 1px solid var(--color-gold, #C9A84C);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.fm-search-dropdown__item {
+  padding: 10px 14px;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 13px;
+  color: var(--color-mist, #e4ebe5);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.12);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 100ms ease;
+}
+
+.fm-search-dropdown__item:last-child {
+  border-bottom: none;
+}
+
+.fm-search-dropdown__item:hover,
+.fm-search-dropdown__item:focus {
+  background: rgba(201, 168, 76, 0.14);
+  color: var(--color-gold-pale, #e4c97a);
+  outline: none;
+}
+
+.fm-search-dropdown__empty {
+  padding: 10px 14px;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 13px;
+  font-style: italic;
+  color: rgba(228, 235, 229, 0.50);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   OUTSIDE-COVERAGE WARNING  (.fm-coverage-warning)
+   Dismissible banner below search bar.
+   ───────────────────────────────────────────────────────────── */
+.fm-coverage-warning {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--color-night-mid, #1a2e2b);
+  color: var(--color-mist, #e4ebe5);
+  border: 1px solid var(--color-laterite, #A0522D);
+  border-left: 4px solid var(--color-laterite, #A0522D);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: min(90vw, 480px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  animation: fm-slide-down 200ms ease both;
+}
+
+@keyframes fm-slide-down {
+  from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.fm-coverage-warning__dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--color-gold, #C9A84C);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.75;
+  transition: opacity 100ms ease;
+}
+
+.fm-coverage-warning__dismiss:hover {
+  opacity: 1;
+}

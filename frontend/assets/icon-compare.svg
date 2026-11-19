@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="#B8892B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <!-- Left frame -->
+  <rect x="5" y="7" width="11" height="18" rx="1.5" stroke="#B8892B" fill="rgba(20, 48, 46, 0.5)" />
+  <!-- Right frame (slightly overlapping) -->
+  <rect x="16" y="7" width="11" height="18" rx="1.5" stroke="#B8892B" fill="rgba(20, 48, 46, 0.5)" />
+  <!-- Central dividing split seam -->
+  <line x1="16" y1="5" x2="16" y2="27" stroke="#B8892B" stroke-width="2" />
+  <!-- Interactive double arrow handle on the divider -->
+  <path d="M 13 16 L 10 16 M 11.5 14.5 L 10 16 L 11.5 17.5" stroke="#E4EBE5" stroke-width="1.5" />
+  <path d="M 19 16 L 22 16 M 20.5 14.5 L 22 16 L 20.5 17.5" stroke="#E4EBE5" stroke-width="1.5" />
+</svg>
+
