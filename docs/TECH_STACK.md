@@ -185,9 +185,16 @@ box and a location summary panel. Flood PNG overlays use the bounds
 
 ### 5.4 Backend, database and reports (Anupa)
 
-[TODO: Anupa to confirm.] Planned: Python API with PostgreSQL + PostGIS, storing flood polygons
-by year and community reports (photo, date, water level), plus integration of all parts.
-
+**Backend (Flask API, `backend/app.py`).** A Python Flask server that serves the flood layers and
+GIS results to the Leaflet map and stores community reports. Flood polygons, roads and waterways
+are precomputed files (GeoJSON) served directly; the location summary is computed on request with
+GeoPandas and rasterio from those files and the SRTM elevation raster. Community reports (location,
+event year, water level, description, optional photo) are stored in SQLite, chosen over
+PostgreSQL/PostGIS because it needs no setup and the data volume is small; the schema maps directly
+to a PostGIS table if the project grows. New reports start as "pending" and appear on the map only
+after a team member approves them. Photos are limited to 6 MB and to jpg/png/webp.
+Endpoints: GET /api/floods?year=, /api/roads, /api/waterways, /api/summary?lat=&lon=,
+GET and POST /api/reports.
 ## 6. Shared data conventions
 
 - Coordinate system: **EPSG:4326** (latitude/longitude) for all vector data.
