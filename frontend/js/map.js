@@ -88,6 +88,115 @@ FM.map = (function () {
         el._timer = setTimeout(() => el.classList.remove('fm-toast--visible'), duration);
     }
 
+    /* ───────────────────── street basemap builders ───────────────────────── */
+
+    /** Basic raster street map (no key needed). */
+    function _buildEsriStreet() {
+        return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxNativeZoom: 19,
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, OpenStreetMap contributors'
+        });
+    }
+
+    /** Scale one label size value (number, legacy stops, or expression). */
+    function _scaleSize(v) {
+        const k = (typeof LABEL_SCALE !== 'undefined') ? LABEL_SCALE : 1.7;
+        const min = (typeof LABEL_MIN_PX !== 'undefined') ? LABEL_MIN_PX : 15;
+        const f = (n) => Math.max(n * k, min);
+
+        function expr(e) {
+            if (typeof e === 'number') return f(e);
+            if (!Array.isArray(e)) return e;
+            const op = e[0];
+            if (op === 'interpolate' || op === 'interpolate-hcl' || op === 'interpolate-lab') {
+                const out = e.slice(0, 3);
+                for (let i = 3; i < e.length; i += 2) out.push(e[i], expr(e[i + 1]));
+                return out;
+            }
+            if (op === 'step') {
+                const out = ['step', e[1], expr(e[2])];
+                for (let i = 3; i < e.length; i += 2) out.push(e[i], expr(e[i + 1]));
+                return out;
+            }
+            if (op === 'case') {
+                const out = ['case'];
+                for (let i = 1; i < e.length - 1; i += 2) out.push(e[i], expr(e[i + 1]));
+                out.push(expr(e[e.length - 1]));
+                return out;
+            }
+            if (op === 'match') {
+                const out = ['match', e[1]];
+                for (let i = 2; i < e.length - 1; i += 2) out.push(e[i], expr(e[i + 1]));
+                out.push(expr(e[e.length - 1]));
+                return out;
+            }
+            return e; // unknown form: leave as the provider drew it
+        }
+
+        if (v === undefined || v === null) return f(16);
+        if (typeof v === 'number') return f(v);
+        if (Array.isArray(v)) return expr(v);
+        if (v && Array.isArray(v.stops)) {
+            return Object.assign({}, v, {
+                stops: v.stops.map(([z, s]) => [z, typeof s === 'number' ? f(s) : s]),
+            });
+        }
+        return v;
+    }
+
+    /** Make every place label larger and readable. Returns how many layers were changed. */
+    function _scaleLabels(gl) {
+        let done = 0;
+        try {
+            (gl.getStyle().layers || []).forEach((l) => {
+                if (l.type !== 'symbol' || !l.layout || !l.layout['text-field']) return;
+                try {
+                    gl.setLayoutProperty(l.id, 'text-size', _scaleSize(l.layout['text-size']));
+                    done++;
+                } catch (_) { /* leave that layer as drawn */ }
+            });
+        } catch (_) { /* style not ready yet; try again on the next event */ }
+        return done;
+    }
+
+    /** Detailed vector street map (MapTiler data via MapLibre). */
+    function _buildVectorStreet() {
+        const layer = L.maplibreGL({
+            style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=' + MAPTILER_KEY,
+            attribution: '&copy; MapTiler &copy; OpenStreetMap contributors',
+        });
+
+        let fellBack = false;
+        layer.on('add', function () {
+            const gl = layer.getMaplibreMap && layer.getMaplibreMap();
+            if (!gl) return;
+            // The style arrives a moment after the map is created, so retry until labels are scaled
+            let scaled = false;
+            const tryScale = () => {
+                if (scaled) return;
+                if (_scaleLabels(gl) > 0) scaled = true;
+            };
+            gl.on('styledata', tryScale);
+            gl.on('load', tryScale);
+            gl.on('idle', tryScale);
+            // Bad or blocked key: switch to the basic map so the app still works
+            gl.on('error', (e) => {
+                const st = e && e.error && e.error.status;
+                if ((st === 401 || st === 403) && !fellBack) {
+                    fellBack = true;
+                    _toast('Map key was rejected, so the basic map is showing. Check MAPTILER_KEY in config.js.', 8000);
+                    if (_map && _basemapMode === 'street') {
+                        _map.removeLayer(layer);
+                        _streetLayer = _buildEsriStreet();
+                        _streetLayer.addTo(_map);
+                    }
+                }
+            });
+        });
+        return layer;
+    }
+
     /* ───────────────────── 1. MAP INITIALISATION ────────────────────────── */
 
     /**
@@ -111,21 +220,10 @@ FM.map = (function () {
         });
 
         /* --- basemap tile layers ------------------------------------------- */
-        if (typeof MAPTILER_KEY !== 'undefined' && MAPTILER_KEY) {
-            // Detailed street map built from OpenStreetMap data
-            _streetLayer = L.tileLayer(
-                'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=' + MAPTILER_KEY,
-                {
-                    maxZoom: 20,
-                    attribution: '&copy; MapTiler &copy; OpenStreetMap contributors'
-                }
-            );
+        if (typeof MAPTILER_KEY !== 'undefined' && MAPTILER_KEY && L.maplibreGL) {
+            _streetLayer = _buildVectorStreet();
         } else {
-            _streetLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-                maxNativeZoom: 19,
-                maxZoom: 19,
-                attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, OpenStreetMap contributors'
-            });
+            _streetLayer = _buildEsriStreet();
         }
 
         _satLayer = L.tileLayer(
